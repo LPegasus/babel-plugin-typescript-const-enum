@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`with renamed namespace work success 1`] = `
+"import 'react';
+export function foo() {
+  const a = 1
+  /*fail*/
+  ;
+  const b = 0
+  /*success*/
+  ;
+  const c = 1
+  /*fail*/
+  ;
+  const d = 0
+  /*success*/
+  ;
+
+  function baz1() {
+    const NS = {
+      STATUS: {
+        success: 'success',
+        fail: 'fail'
+      }
+    };
+    return NS.STATUS.success;
+  }
+
+  function baz2() {
+    const ONS = {
+      success: 'success',
+      fail: 'fail'
+    };
+    return ONS.success;
+  }
+
+  function baz3() {
+    const N = {
+      S: {
+        STATUS: {
+          success: 'success',
+          fail: 'fail'
+        }
+      }
+    };
+
+    function bas3Closure() {
+      return N.S.STATUS.fail;
+    }
+
+    return bas3Closure();
+  }
+
+  function haha() {
+    return function () {
+      return 0
+      /*success*/
+      ;
+    };
+  }
+
+  return;
+}"
+`;
+
+exports[`without renamed namespace work success 1`] = `
+"import 'react';
+export function foo() {
+  console.log(1
+  /*fail*/
+  );
+
+  function bar() {
+    const NS = '';
+    return NS;
+  }
+
+  bar();
+  return;
+}"
+`;

@@ -1,0 +1,42 @@
+{
+  "name": "babel-plugin-typescript-const-enum",
+  "version": "1.0.0",
+  "description": "A babel plugin to replace typescript const enum expression as TS does.",
+  "keywords": [
+    "typescript",
+    "const enum",
+    "babel plugin"
+  ],
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "scripts": {
+    "test": "jest",
+    "test:w": "jest --watch",
+    "build": "rm -rf ./lib ./es && npm run build:lib && npm run build:es",
+    "build:lib": "tsc -p ./tsconfig.build.json",
+    "build:es": "tsc -p ./tsconfig.build.json --outDir es --module esnext && node ./rename_mjs.js",
+    "build:w": "npm run build -- -w"
+  },
+  "files": [
+    "./lib",
+    "./es"
+  ],
+  "author": "pegusas1@hotmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.10.4",
+    "@types/jest": "^26.0.10",
+    "babel-plugin-tester": "^9.2.0",
+    "glob": "^7.1.6",
+    "jest": "^26.4.1",
+    "prettier": "^2.0.5",
+    "ts-jest": "^26.2.0",
+    "typescript": "^4.0.2"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.11.4",
+    "@babel/traverse": "^7.11.0",
+    "@babel/types": "^7.11.0",
+    "tslib": "^2.0.1"
+  }
+}
