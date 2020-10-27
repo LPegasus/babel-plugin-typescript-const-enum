@@ -71,7 +71,7 @@ export default function babelPluginTypescriptConstEnum(_, options = {}) {
     return {
         visitor: {
             Program(path) {
-                const namespaceAlias = getNamespaceAliasMapFromProgram(path.node.body, allKeys);
+                const namespaceAlias = getNamespaceAliasMapFromProgram(path.node.body, allKeys, path);
                 path.traverse(internalVisitor, {
                     enums,
                     namespaceAlias,
