@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-typescript-const-enum",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A babel plugin to replace typescript const enum expression as TS does.",
   "keywords": [
     "typescript",
@@ -8,7 +8,7 @@
     "babel plugin"
   ],
   "main": "lib/index.js",
-  "module": "es/index.js",
+  "module": "es/index.mjs",
   "scripts": {
     "test": "jest",
     "test:w": "jest --watch",
