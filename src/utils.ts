@@ -1,5 +1,6 @@
 import * as t from '@babel/types';
-import { NodePath } from '@babel/traverse';
+import type { NodePath } from '@babel/core';
+import type { Program } from '@babel/types';
 
 /**
  * @example
@@ -41,12 +42,32 @@ export function getConstEnumMemberExpression(node: t.MemberExpression) {
 
 export function getNamespaceAliasMapFromProgram(
   body: t.Statement[],
-  allKeys: string[]
+  allKeys: string[],
+  path?: NodePath<Program>
 ): Map<string, string> {
   const alias = new Map<string, string>();
   const mayBeRenamedAlias: Array<[string, t.Identifier]> = []; // maybe
-  body.forEach((d) => {
+  body.forEach((d, index) => {
     if (!t.isTSImportEqualsDeclaration(d)) {
+      if (path && t.isVariableDeclaration(d) && d.declarations.length === 1) {
+        const firstDeclaratorInit = d.declarations[0].init;
+        if (t.isMemberExpression(firstDeclaratorInit)) {
+          // tsc 之后 import xxx = v.v.v 会变成 var xxx = v.v.v
+          // 这里处理 tsc 后的代码
+          const memberExpCode = path
+            .getSource()
+            .substring(firstDeclaratorInit.start!, firstDeclaratorInit.end!);
+          const root = memberExpCode.split('.')[0];
+          if (!root) {
+            return;
+          }
+          if (path.scope.getBindingIdentifier(root)) {
+            return;
+          }
+          (path.get('body.' + index) as any).remove();
+          alias.set((d.declarations[0].id as any).name, memberExpCode);
+        }
+      }
       return;
     }
     const left = d.id.name;

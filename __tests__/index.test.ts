@@ -60,3 +60,30 @@ it('without renamed namespace work success', async () => {
 
   expect(result?.code).toMatchSnapshot();
 });
+
+it('with-ts-compiled should be work', async () => {
+  const tInput = fs.promises.readFile(
+    path.resolve(fixtures_dirname, 'with-ts-compiled/input.js'),
+    'utf8'
+  );
+  const input = await tInput;
+
+  const result = await babel.transformAsync(input, {
+    presets: [],
+    filename: 'input.js',
+    plugins: [
+      [
+        babelPluginTypescriptConstEnum,
+        {
+          enums: {
+            'HOHO.HAHA_COMMON.ErrorCode.A': 'A',
+            'HOHO.HAHA_COMMON.ErrorCode.B': 'B',
+            'HOHO.HAHA_COMMON.ErrorCode.C': 'C',
+          },
+        },
+      ],
+    ],
+  });
+
+  expect(result?.code).toMatchSnapshot();
+});

@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-typescript-const-enum",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "A babel plugin to replace typescript const enum expression as TS does.",
   "keywords": [
     "typescript",
@@ -18,8 +18,8 @@
     "build:w": "npm run build -- -w"
   },
   "files": [
-    "./lib",
-    "./es"
+    "lib",
+    "es"
   ],
   "author": "pegusas1@hotmail.com",
   "license": "ISC",
