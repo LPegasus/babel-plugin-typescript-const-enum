@@ -37,6 +37,7 @@ export function getConstEnumMemberExpression(node) {
 export function getNamespaceAliasMapFromProgram(body, allKeys, path) {
     const alias = new Map();
     const mayBeRenamedAlias = []; // maybe
+    const pendingRemoveBodyIndexList = [];
     body.forEach((d, index) => {
         if (!t.isTSImportEqualsDeclaration(d)) {
             if (path && t.isVariableDeclaration(d) && d.declarations.length === 1) {
@@ -54,8 +55,20 @@ export function getNamespaceAliasMapFromProgram(body, allKeys, path) {
                     if (path.scope.getBindingIdentifier(root)) {
                         return;
                     }
-                    path.get('body.' + index).remove();
+                    pendingRemoveBodyIndexList.unshift(index);
                     alias.set(d.declarations[0].id.name, memberExpCode);
+                }
+                else if (t.isIdentifier(firstDeclaratorInit)) {
+                    const left = d.declarations[0].id.name;
+                    const right = firstDeclaratorInit.name;
+                    const memberExpCodeMaybe = alias.get(right);
+                    if (memberExpCodeMaybe) {
+                        pendingRemoveBodyIndexList.unshift(index);
+                        alias.set(left, memberExpCodeMaybe);
+                    }
+                    if (!path.scope.getBindingIdentifier(right)) {
+                        alias.set(left, right);
+                    }
                 }
             }
             return;
@@ -84,6 +97,11 @@ export function getNamespaceAliasMapFromProgram(body, allKeys, path) {
             alias.set(l, identifier.name);
         }
     });
+    if (path) {
+        pendingRemoveBodyIndexList.forEach((index) => {
+            path.get('body.' + index).remove();
+        });
+    }
     return alias;
 }
 const DOT_REG = /\./g;

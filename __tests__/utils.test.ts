@@ -6,6 +6,7 @@ import {
 } from '../src/utils';
 import * as t from '@babel/types';
 import * as parser from '@babel/parser';
+import * as babel from '@babel/core';
 
 const _code = `
 import React from 'react';
@@ -22,6 +23,22 @@ const v4 = AliasNS2.STATUS.string;
 const v5 = CONST_ENUM_STATUS.success;
 const v6 = STATUS.success;
 `.trim();
+
+const _code2 = `
+import React from 'react';
+
+var AliasNS1 = A.B.C;
+var AliasNS2 = A2.B2.C2;
+var RenamedNS = AliasNS1;
+var STATUS = CONST_ENUM_STATUS;
+
+const v1 = A.B.C.STATUS.string;
+const v2 = AliasNS1.STATUS.boolean;
+const v3 = RenamedNS.STATUS.number;
+const v4 = AliasNS2.STATUS.string;
+const v5 = CONST_ENUM_STATUS.success;
+const v6 = STATUS.success;
+`;
 
 const _enums = {
   'A.B.C.STATUS.string': '0',
@@ -83,14 +100,52 @@ it('getNamespaceAliasMapFromProgram work success', () => {
     ast.program.body,
     Object.keys(_enums)
   );
-  [
+
+  const expected = new Map([
     ['AliasNS1', 'A.B.C'],
     ['AliasNS2', 'A2.B2.C2'],
     ['RenamedNS', 'A.B.C'],
     ['STATUS', 'CONST_ENUM_STATUS'],
-  ].forEach(([k, v]) => {
-    expect(map.get(k)).toEqual(v);
+  ]);
+
+  expect(map).toEqual(expected);
+});
+
+it('getNamespaceAliasMapFromProgram works with ts transpiled code', () => {
+  const ast = parser.parse(_code2, {
+    plugins: ['typescript'],
+    sourceFilename: 'index.ts',
+    sourceType: 'module',
   });
+
+  let nodePath = undefined;
+  babel.transformFromAstSync(ast, _code2, {
+    plugins: [
+      {
+        visitor: {
+          Program(path) {
+            nodePath = path;
+          },
+        },
+      },
+    ],
+  });
+
+  const map = getNamespaceAliasMapFromProgram(
+    ast.program.body,
+    Object.keys(_enums),
+    nodePath
+  );
+
+  const expected = new Map([
+    ['AliasNS1', 'A.B.C'],
+    ['AliasNS2', 'A2.B2.C2'],
+    ['RenamedNS', 'A.B.C'],
+    ['STATUS', 'CONST_ENUM_STATUS'],
+    ['v1', 'A.B.C.STATUS.string'],
+    ['v5', 'CONST_ENUM_STATUS.success'],
+  ]);
+  expect(map).toEqual(expected);
 });
 
 it('escapeDotForRegExp work success', () => {
