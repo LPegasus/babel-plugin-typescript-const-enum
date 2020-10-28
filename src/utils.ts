@@ -47,6 +47,7 @@ export function getNamespaceAliasMapFromProgram(
 ): Map<string, string> {
   const alias = new Map<string, string>();
   const mayBeRenamedAlias: Array<[string, t.Identifier]> = []; // maybe
+  const pendingRemoveBodyIndexList: Array<number> = [];
   body.forEach((d, index) => {
     if (!t.isTSImportEqualsDeclaration(d)) {
       if (path && t.isVariableDeclaration(d) && d.declarations.length === 1) {
@@ -64,8 +65,19 @@ export function getNamespaceAliasMapFromProgram(
           if (path.scope.getBindingIdentifier(root)) {
             return;
           }
-          (path.get('body.' + index) as any).remove();
+          pendingRemoveBodyIndexList.unshift(index);
           alias.set((d.declarations[0].id as any).name, memberExpCode);
+        } else if (t.isIdentifier(firstDeclaratorInit)) {
+          const left = (d.declarations[0].id as any).name;
+          const right = firstDeclaratorInit.name;
+          const memberExpCodeMaybe = alias.get(right);
+          if (memberExpCodeMaybe) {
+            pendingRemoveBodyIndexList.unshift(index);
+            alias.set(left, memberExpCodeMaybe);
+          }
+          if (!path.scope.getBindingIdentifier(right)) {
+            alias.set(left, right);
+          }
         }
       }
       return;
@@ -95,6 +107,11 @@ export function getNamespaceAliasMapFromProgram(
       alias.set(l, identifier.name);
     }
   });
+  if (path) {
+    pendingRemoveBodyIndexList.forEach((index) => {
+      (path.get('body.' + index) as any).remove();
+    });
+  }
   return alias;
 }
 
