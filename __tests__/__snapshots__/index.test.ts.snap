@@ -75,6 +75,7 @@ var SuccessCode = {
     }
   }
 };
+const htmlDom = document.getElementsByTagName('html')[0];
 var P = HOHOHO.A;
 
 const ErrorToString = code => {
