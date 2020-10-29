@@ -11,6 +11,8 @@ var SuccessCode = {
   }
 };
 
+const htmlDom = document.getElementsByTagName('html')[0];
+
 var ErrorCode = HOHO.HAHA_COMMON.ErrorCode;
 var P = HOHOHO.A;
 

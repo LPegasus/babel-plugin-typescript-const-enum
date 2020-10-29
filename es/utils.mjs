@@ -38,6 +38,11 @@ export function getNamespaceAliasMapFromProgram(body, allKeys, path) {
     const alias = new Map();
     const mayBeRenamedAlias = []; // maybe
     const pendingRemoveBodyIndexList = [];
+    const rootSet = new Set();
+    allKeys.forEach((k) => {
+        const root = k.split('.')[0];
+        rootSet.add(root);
+    });
     body.forEach((d, index) => {
         if (!t.isTSImportEqualsDeclaration(d)) {
             if (path && t.isVariableDeclaration(d) && d.declarations.length === 1) {
@@ -52,7 +57,8 @@ export function getNamespaceAliasMapFromProgram(body, allKeys, path) {
                     if (!root) {
                         return;
                     }
-                    if (path.scope.getBindingIdentifier(root)) {
+                    // 非全局变量 或者 enums key 中并没有这个 root
+                    if (path.scope.getBindingIdentifier(root) || !rootSet.has(root)) {
                         return;
                     }
                     pendingRemoveBodyIndexList.unshift(index);
